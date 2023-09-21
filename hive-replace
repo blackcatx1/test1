@@ -83,9 +83,9 @@ function prepare {
   echo -e "Current OS booted from ${GREEN}$DISK_NAME${NOCOLOR} and the whole drive size is ${WHITE}$DISK_SIZE${NOCOLOR} MB"
   [[ $DISK_SIZE -lt 8192 ]] && echo -e "\n${YELLOW}The minimum disk size for HiveOS is 8 Gb${NOCOLOR}" && exit
   echo -e "${RED}Warning: After installing HiveOS, all your data on ${GREEN}$DISK_NAME${NOCOLOR}${RED} will be lost!${NOCOLOR}"
-  echo -en "\nType ${GREEN}\"yes\"${NOCOLOR} if you want to install Hive OS on ${GREEN}$DISK_NAME${NOCOLOR} : "
-  read answer
-  [[ $answer != "yes" ]] && echo -e "${YELLOW}\nBye, bye!${NOCOLOR}" && exit
+  # echo -en "\nType ${GREEN}\"yes\"${NOCOLOR} if you want to install Hive OS on ${GREEN}$DISK_NAME${NOCOLOR} : "
+  # read answer
+  # [[ $answer != "yes" ]] && echo -e "${YELLOW}\nBye, bye!${NOCOLOR}" && exit
 
   # Check for necessary programs
   programs=0
