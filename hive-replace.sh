@@ -25,7 +25,7 @@ fi
 function download_hive_image {
   # Download the HiveOS image file and place it in /tmp
   echo -e "${GREEN}\nDownloading HiveOS image${NOCOLOR}"
-  wget -q --show-progress https://download.hiveos.farm/hiveos-0.6-222-stable@230512.img.xz -O /tmp/hiveos-0.6-222-stable@230512.img.xz
+  wget -q --show-progress https://download.hiveos.farm/history/hiveos-0.6-222-stable@230512.img.xz -O /tmp/hiveos-0.6-222-stable@230512.img.xz
   [[ $? -ne 0 ]] && echo "${RED}Download Hive OS image failed. Check the URL${NOCOLOR}" && exit 1
 }
 
