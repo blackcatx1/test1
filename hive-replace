@@ -59,6 +59,7 @@ function get {
   archname="hiveos-0.6-222-stable@230512.img.xz"  # Hardcoded XZ image filename
   mdsum=$(sed -n "/$archname/p" $TMPDIR/VERSIONS.txt | awk '{print$2}')
   
+  # No MD5 checksum check
   # Check md5sum
   echo "${GREEN}Check MD5 sum of image file${NOCOLOR}"
   mdsum_hive=$(md5sum $archname | awk '{print$1}')
