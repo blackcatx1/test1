@@ -47,9 +47,8 @@ function get {
 
     # Verify file extension and handle img.xz format
     if [[ "$url" == *.img.xz ]]; then
-        arch="$TMPDIR/$(basename "$url")"
-        mv "$arch" "$TMPDIR/hiveos.img.xz"
-        unxz "$TMPDIR/hiveos.img.xz"
+    arch="$TMPDIR/$(basename "$url")"
+    unxz "$arch"
     fi
 
     # Get correct md5sum from Hive repo
