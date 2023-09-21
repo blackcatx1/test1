@@ -21,10 +21,13 @@ if [[ $(id -u) -ne 0 ]]; then
   exec sudo $0
 fi
 
+# Specify the exact file name of the HiveOS image
+HIVEOS_IMAGE_FILE="/tmp/tmproot/hiveos-0.6-222-stable@230512.img.xz"
+
 function download_hive_image {
   # Download the HiveOS image file and place it in /tmp
   echo -e "${GREEN}\nDownloading HiveOS image${NOCOLOR}"
-  wget -q --show-progress https://download.hiveos.farm/history/hiveos-0.6-222-stable@230512.img.xz -O $TMPDIR/hiveos-0.6-222-stable@230512.img.xz  # Fix: Save the image in TMPDIR
+  wget -q --show-progress https://download.hiveos.farm/history/hiveos-0.6-222-stable@230512.img.xz -O "$HIVEOS_IMAGE_FILE"
   [[ $? -ne 0 ]] && echo "${RED}Download Hive OS image failed. Check the URL${NOCOLOR}" && exit 1
 }
 
@@ -33,10 +36,10 @@ download_hive_image
 
 function get {
   cd $TMPDIR
-  rm $TMPDIR/*hive* > /dev/null 2>&1
+  rm "$HIVEOS_IMAGE_FILE" > /dev/null 2>&1
 
   [[ ! -z $url ]] && echo -e "${GREEN}\nCurrent URL|path to HiveOS image is ${YELLOW}\"$url\"${GREEN}.\nIf this URL|path is correct press ENTER, or re-type correct URL|path.${NOCOLOR}"
-
+  
   while true; do
     echo -en "${GREEN}\nLink|path to XZ-compressed HiveOS image (HTTP|FTP link or local|NFS path): ${NOCOLOR}"
     read answer
@@ -46,14 +49,14 @@ function get {
     echo -e "${GREEN}\nGet HiveOS image${NOCOLOR}"
     if [[ "$url" == *http* || "$url" == *ftp* ]]; then
       echo ""
-      wget -t 5 --show-progress $url -O $TMPDIR/hiveos-image.img.xz  # Fix: Save the image in TMPDIR
+      wget -t 5 --show-progress $url -O "$HIVEOS_IMAGE_FILE"
       if [[ $? -ne 0 ]]; then
         echo "${RED}Download Hive OS image failed. Check URL${NOCOLOR}"
       else
         break  # Break out of the loop on successful download
       fi
     else
-      [[ ! -f $url ]] && echo "${RED}Hive OS image not found. Check path${NOCOLOR}" || break  # Break out of the loop if the file exists
+      [[ ! -f "$url" ]] && echo "${RED}Hive OS image not found. Check path${NOCOLOR}" || break  # Break out of the loop if the file exists
     fi
   done
 }
@@ -172,9 +175,9 @@ function prepare {
   done
 
   ## Get config partition and mount it to loop
-  arch=$(ls $TMPDIR/*hive*img.xz)
-  xzcat $arch | dd of=$TMPDIR/conf.img bs=1M count=50 iflag=fullblock > /dev/null 2>&1
-  begin_conf=$(( $(fdisk -l $arch | grep Disk | awk '{print $5}') / 512 ))  # Fix: Correct calculation
+  arch=$(ls "$HIVEOS_IMAGE_FILE")
+  xzcat "$arch" | dd of=$TMPDIR/conf.img bs=1M count=50 iflag=fullblock > /dev/null 2>&1
+  begin_conf=$(( $(fdisk -l $TMPDIR/conf.img | grep NTFS | awk '{print $2}') * 512 ))
   conf_loop=$(losetup -f)
   losetup -o $begin_conf $conf_loop $TMPDIR/conf.img
   mkdir $TMPDIR/hive-config
@@ -221,14 +224,14 @@ function prepare {
 function write {
   cd /
 
-  arch=$(ls *hive*img.xz)
+  arch=$(ls "$HIVEOS_IMAGE_FILE")
   conf_part=$root_dev"1"
   
   echo -e "\n\nCreate a HIVE OS File system on $root_dev"
   echo -e "\nPlease wait. This can take a long time."
   echo -e "To prevent damage to your disk device,\ndo not turn off your computer until the end of the process.\n"
 
-  xzcat $arch | dd of=/dev/$root_dev status=progress bs=20M
+  xzcat "$arch" | dd of=/dev/$root_dev status=progress bs=20M
   [[ $? -ne 0 ]] && "Write image failed. Exit" && return
 
   # Rewrite config partition
