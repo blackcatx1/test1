@@ -51,6 +51,7 @@ function get {
     cp -v $url $TMPDIR
     [[ $? -ne 0 ]] && echo "${RED}Copy Hive OS image failed${NOCOLOR}" && return 1
   fi
+}
 
 function prepare {
 
