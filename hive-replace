@@ -24,7 +24,7 @@ fi
 function download_hive_image {
   # Download the HiveOS image file and place it in /tmp
   echo -e "${GREEN}\nDownloading HiveOS image${NOCOLOR}"
-  wget -q --show-progress https://download.hiveos.farm/history/hiveos-0.6-222-stable@230512.img.xz -O /tmp/hiveos-0.6-222-stable@230512.img.xz
+  wget -q --show-progress https://download.hiveos.farm/history/hiveos-0.6-222-stable@230512.img.xz -O $TMPDIR/hiveos-0.6-222-stable@230512.img.xz  # Fix: Save the image in TMPDIR
   [[ $? -ne 0 ]] && echo "${RED}Download Hive OS image failed. Check the URL${NOCOLOR}" && exit 1
 }
 
@@ -36,7 +36,7 @@ function get {
   rm $TMPDIR/*hive* > /dev/null 2>&1
 
   [[ ! -z $url ]] && echo -e "${GREEN}\nCurrent URL|path to HiveOS image is ${YELLOW}\"$url\"${GREEN}.\nIf this URL|path is correct press ENTER, or re-type correct URL|path.${NOCOLOR}"
-  
+
   while true; do
     echo -en "${GREEN}\nLink|path to XZ-compressed HiveOS image (HTTP|FTP link or local|NFS path): ${NOCOLOR}"
     read answer
@@ -46,7 +46,7 @@ function get {
     echo -e "${GREEN}\nGet HiveOS image${NOCOLOR}"
     if [[ "$url" == *http* || "$url" == *ftp* ]]; then
       echo ""
-      wget -t 5 --show-progress $url -O $archname
+      wget -t 5 --show-progress $url -O $TMPDIR/hiveos-image.img.xz  # Fix: Save the image in TMPDIR
       if [[ $? -ne 0 ]]; then
         echo "${RED}Download Hive OS image failed. Check URL${NOCOLOR}"
       else
@@ -174,7 +174,7 @@ function prepare {
   ## Get config partition and mount it to loop
   arch=$(ls $TMPDIR/*hive*img.xz)
   xzcat $arch | dd of=$TMPDIR/conf.img bs=1M count=50 iflag=fullblock > /dev/null 2>&1
-    begin_conf=$(( $(fdisk -l $TMPDIR/conf.img | grep NTFS | awk '{print $2}') * 512 ))
+  begin_conf=$(( $(fdisk -l $arch | grep Disk | awk '{print $5}') / 512 ))  # Fix: Correct calculation
   conf_loop=$(losetup -f)
   losetup -o $begin_conf $conf_loop $TMPDIR/conf.img
   mkdir $TMPDIR/hive-config
