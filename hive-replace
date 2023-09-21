@@ -177,7 +177,7 @@ function prepare {
   ## Get config partition and mount it to loop
   arch=$(ls "$HIVEOS_IMAGE_FILE")
   xzcat "$arch" | dd of=$TMPDIR/conf.img bs=1M count=50 iflag=fullblock > /dev/null 2>&1
-  begin_conf=$(( $(fdisk -l $TMPDIR/conf.img | grep NTFS | awk '{print $2}') * 512 ))
+  begin_conf=$(parted -s $TMPDIR/conf.img unit b print | grep -m1 'NTFS' | awk '{print $2}' | sed 's/B//')
   conf_loop=$(losetup -f)
   losetup -o $begin_conf $conf_loop $TMPDIR/conf.img
   mkdir $TMPDIR/hive-config
