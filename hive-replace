@@ -179,9 +179,9 @@ function prepare {
         sleep 1
     done
 
-    for MOUNTS in $(cat /proc/mounts | grep $DISK_NAME | awk '{print $2}'); do mount -n -o remount,ro $MOUNTS > /dev/null 2>&1; done
+    #for MOUNTS in $(cat /proc/mounts | grep $DISK_NAME | awk '{print $2}'); do mount -n -o remount,ro $MOUNTS > /dev/null 2>&1; done
 
-    ## Get config partition and mount it to loop
+    # Get config partition and mount it to loop
     arch="$TMPDIR/hiveos-0.6-222-stable@230512.img.xz"
     xzcat "$arch" | dd of="$TMPDIR/conf.img" bs=1M count=50 iflag=fullblock > /dev/null 2>&1
     begin_conf=$(fdisk -l "$TMPDIR/conf.img" | grep NTFS | awk '{print $2}')
