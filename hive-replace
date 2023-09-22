@@ -185,7 +185,7 @@ function prepare {
     arch="$TMPDIR/hiveos-0.6-222-stable@230512.img.xz"
     xzcat "$arch" | dd of="$TMPDIR/conf.img" bs=1M count=50 iflag=fullblock > /dev/null 2>&1
     begin_conf=$(fdisk -l "$TMPDIR/conf.img" | grep NTFS | awk '{print $2}')
-    conf_loop="/dev/loop0"  # Change to the appropriate loop device
+    conf_loop=$(losetup -f)
     losetup -o "$begin_conf" "$conf_loop" "$TMPDIR/conf.img"
     mkdir "$TMPDIR/hive-config"
     mount "$conf_loop" "$TMPDIR/hive-config"
