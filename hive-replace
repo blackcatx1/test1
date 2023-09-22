@@ -45,13 +45,7 @@ function get {
         [[ $? -ne 0 ]] && echo "${RED}Copy Hive OS image failed${NOCOLOR}" && return 1
     fi
 
-    # Verify file extension and handle img.xz format
-    if [[ "$url" == *.img.xz ]]; then
-    arch="$TMPDIR/$(basename "$url")"
-    unxz "$arch"
-    fi
-
-    # Get correct md5sum from Hive repo
+   # Get correct md5sum from Hive repo
     curl -s "$md5_url" > "$TMPDIR/VERSIONS.txt"
     [[ $? -ne 0 ]] && echo "${RED}Can't get the required data from Hive OS server. Check your internet connection${NOCOLOR}" && return 1
     archname=$(basename "$url")
@@ -63,6 +57,13 @@ function get {
     [[ $mdsum != $mdsum_hive ]] && echo "${RED}MD5 sum of image file is incorrect${NOCOLOR}" && return 1
     echo "${GREEN}Download|copy HiveOS image success!${NOCOLOR}"
     return 0
+}
+    
+    # Verify file extension and handle img.xz format
+    if [[ "$url" == *.img.xz ]]; then
+    arch="$TMPDIR/$(basename "$url")"
+    unxz "$arch"
+    fi
 }
 
 function prepare {
