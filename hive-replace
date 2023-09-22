@@ -236,11 +236,10 @@ function write {
         echo "Write image failed. Exit"
         return
     fi
-}
 
     # Rewrite config partition
     partprobe > /dev/null 2>&1
-    dd if=/new_conf.img of="/dev/$conf_part" > /dev/null 2>&1
+    dd if="$conf_loop" of="/dev/$conf_part" > /dev/null 2>&1
 
     # Reboot
     sync
@@ -267,5 +266,10 @@ function sel {
         prepare
     fi
 }
+
+# Ask for FARM_HASH
+echo -en "${GREEN}\nType your FARM_HASH from Web-interface: ${NOCOLOR}"
+read -r farm_hash
+[[ -z $farm_hash ]] && echo "${RED}FARM_HASH can't be empty. Exiting.${NOCOLOR}" && exit
 
 sel
