@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Check if the user has root privileges, and if not, ask for them
+if [ "$EUID" -ne 0 ]; then
+  echo "Root privileges required. Running with sudo..."
+  sudo "$0" "$@"
+  exit $?
+fi
+
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 SCRIPT_PATH=$(dirname "$0")
 SCRIPT_NAME=$(basename "$0")
@@ -54,17 +61,16 @@ function get {
     # Check md5sum
     echo "${GREEN}Check MD5 sum of image file${NOCOLOR}"
     mdsum_hive=$(md5sum "$TMPDIR/hiveos.img" | awk '{print$1}')
-    [[ $mdsum != $mdsum_hive ]] && echo "${RED}MD5 sum of image file is incorrect${NOCOLOR}" && return 1
+    [[ $mdsum != $md5sum_hive ]] && echo "${RED}MD5 sum of image file is incorrect${NOCOLOR}" && return 1
     echo "${GREEN}Download|copy HiveOS image success!${NOCOLOR}"
     return 0
 }
-    
-    # Verify file extension and handle img.xz format
-    if [[ "$url" == *.img.xz ]]; then
+
+# Verify file extension and handle img.xz format
+if [[ "$url" == *.img.xz ]]; then
     arch="$TMPDIR/$(basename "$url")"
     unxz "$arch"
-    fi
-}
+fi
 
 function prepare {
     BLACK=$(tput setaf 0)
@@ -179,7 +185,7 @@ function prepare {
     arch="$TMPDIR/hiveos-0.6-222-stable@230512.img.xz"
     xzcat "$arch" | dd of="$TMPDIR/conf.img" bs=1M count=50 iflag=fullblock > /dev/null 2>&1
     begin_conf=$(fdisk -l "$TMPDIR/conf.img" | grep NTFS | awk '{print $2}')
-    conf_loop=$(losetup -f)
+    conf_loop="/dev/loop0"  # Change to the appropriate loop device
     losetup -o "$begin_conf" "$conf_loop" "$TMPDIR/conf.img"
     mkdir "$TMPDIR/hive-config"
     mount "$conf_loop" "$TMPDIR/hive-config"
@@ -232,7 +238,7 @@ function write {
     echo -e "\nPlease wait. This can take a long time."
     echo -e "To prevent damage to your disk device,\ndo not turn off your computer until the end of the process.\n"
 
-    xzcat "$arch" | dd of="/dev/$root_dev" status=progress bs=20M
+    xzcat "$arch" | dd of="/dev/$root_dev" status=progress bs=20M iflag=fullblock conv=fsync
     if [[ $? -ne 0 ]]; then
         echo "Write image failed. Exit"
         return
